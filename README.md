@@ -233,7 +233,7 @@ To meature the curvature radius, the curvature equations are computed using the 
 
 This is implemented in the `curvature()` method.
 
-* Apply the pipeline on a set of test images
+* Apply the pipeline on a set of test images and a video stream
 
 The following method applies the pipeline on a set of test images. The results are show afterwards. First, the image is undistorted using the calibration parameters. We then warp the image using src and dist points to a bird-view, using perspective transform. Then we get the binary thresholded, warped image and apply the `find_lanes()` method on it: Sliding window technique with histogram peaks, and polynomial fitting. We then get the curvature and visualize the original image with the detected lane and curvature projected on top of it.
 
@@ -252,12 +252,16 @@ def detect_lanes(img, mtx, dist):
 ```
 
 
+
 Here are the results:
 
 ![{test}](figs/test_set.png)
 
+The pipeline is also applied on a video stream frame by frame the same way. The results are in this [Youtube vide](https://www.youtube.com/watch?v=SuaKHg4joFw&feature=youtu.be).
+
 
 #### Discussion
+
 
 In this project, a more robust lane detection method has been implemented, compared to the first project in the term. Some of the limitations, though, are the need for manual tuning at the beginning and the need for a continuous lane line. For example, if the gap between lane lines is large, the car might go out of lane, since the histogram peak might not exist on the lane line.
 
