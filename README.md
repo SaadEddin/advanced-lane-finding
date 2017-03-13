@@ -255,3 +255,10 @@ def detect_lanes(img, mtx, dist):
 Here are the results:
 
 ![{test}](figs/test_set.png)
+
+
+#### Discussion
+
+In this project, a more robust lane detection method has been implemented, compared to the first project in the term. Some of the limitations, though, are the need for manual tuning at the beginning and the need for a continuous lane line. For example, if the gap between lane lines is large, the car might go out of lane, since the histogram peak might not exist on the lane line.
+
+This could happen due to reasons such as faded color of lane lines and other reasons.
