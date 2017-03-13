@@ -257,7 +257,7 @@ Here are the results:
 
 ![{test}](figs/test_set.png)
 
-The pipeline is also applied on a video stream frame by frame the same way. The results are in this [Youtube vide](https://www.youtube.com/watch?v=SuaKHg4joFw&feature=youtu.be).
+The pipeline is also applied on a video stream frame by frame the same way. The results are in this [Youtube video](https://www.youtube.com/watch?v=SuaKHg4joFw&feature=youtu.be).
 
 
 #### Discussion
