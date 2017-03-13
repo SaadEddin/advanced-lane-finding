@@ -246,7 +246,7 @@ def detect_lanes(img, mtx, dist):
     img_grad_thresh = gradient_thresh(warped)    
     binary_warped = combine_thresholds(color=img_color_thresh, grad=img_grad_thresh)    
     leftx, lefty, rightx, righty = find_lanes(binary_warped)
-    ploty, left_fitx, right_fitx = polyfit(binary_warped, leftx, lefty, rightx, righty)
+    ploty, left_fitx, right_fiqtx = polyfit(binary_warped, leftx, lefty, rightx, righty)
     left_curverad, right_curverad = curvature(ploty, leftx, lefty, rightx, righty)
     return visualization(binary_warped, ploty, left_fitx, right_fitx, Minv, undist, left_curverad, right_curverad)
 ```
@@ -263,6 +263,65 @@ The pipeline is also applied on a video stream frame by frame the same way. The 
 #### Discussion
 
 
-In this project, a more robust lane detection method has been implemented, compared to the first project in the term. Some of the limitations, though, are the need for manual tuning at the beginning and the need for a continuous lane line. For example, if the gap between lane lines is large, the car might go out of lane, since the histogram peak might not exist on the lane line.
+In this project, a more robust lane detection method has been implemented, compared to the first project in the term. Some of the limitations, though, are the need for manual tuning at the beginning and the need for a continuous lane line. For example, if the gap between lane lines is large, the car might go out of lane, since the histogram peak might not exist on the lane line. This could happen due to reasons such as faded color of lane lines and other reasons.
 
-This could happen due to reasons such as faded color of lane lines and other reasons.
+Some ways to improve the pipeline:
+
+* Enhance the contrast in each frame: This helps in shadow areas. I had problems with a section of the street where there was a tree shoado, this led the peaks of the histogram to be offset from the lane lines. By enhancing contrast, we make sure thresholding captures the lane lines more clearly.
+
+* Apply Kalman Filters on each lane line: This should produce a smooth frame-to-frame visualizations of the lane. This is a term 2 topic and would like to apply it later.
+
+For the first problem, where I had some lane-lines off due to shadowy areas, I tried to minimize it by tracking the MSE of the current lane line with the previous one, and if the MSE is above 500 (I chose this value based on trial and error) then I use the previous lane line. If it's less than 500 then I use the current lane line.
+
+Here is the code:
+
+```python
+from sklearn.metrics import mean_squared_error
+
+def detect_lanes(img, mtx, dist, overlay=None):
+    undist = cv2.undistort(img, mtx, dist, None, mtx)
+    Minv, warped = warp(undist, src, dst)
+    img_color_thresh = color_thresh(warped)
+    img_grad_thresh = gradient_thresh(warped)    
+    binary_warped = combine_thresholds(color=img_color_thresh, grad=img_grad_thresh)    
+    leftx, lefty, rightx, righty, out_img = find_lanes(binary_warped)
+    ploty, left_fitx, right_fitx = polyfit(binary_warped, leftx, lefty, rightx, righty)
+    aaa.append(right_fitx)
+    
+    if overlay is not None:
+        if len(overlay.right_lane) <= 10:
+            overlay.right_lane.append(right_fitx)
+            overlay.left_lane.append(left_fitx)
+        if len(overlay.right_lane) > 10:
+
+            mse_right = mean_squared_error(right_fitx, overlay.right_lane[-2])
+            mse_left = mean_squared_error(left_fitx, overlay.left_lane[-2])
+
+            if mse_right <= 400:
+                overlay.right_lane.append(right_fitx)
+            if mse_right > 400:
+                right_fitx = overlay.right_lane[-2]
+                overlay.right_lane.append(right_fitx)
+                
+            if mse_left <= 400:
+                overlay.left_lane.append(left_fitx)
+            if mse_left > 400:
+                left_fitx = overlay.left_lane[-2]
+                overlay.left_lane.append(left_fitx)
+
+    left_curverad, right_curverad = curvature(ploty, leftx, lefty, rightx, righty)
+
+    viz = visualization(binary_warped, ploty, left_fitx, right_fitx, Minv, undist, left_curverad, right_curverad)
+    return viz
+
+
+class Overlay:
+    def __init__(self):
+        self.right_lane = []
+        self.left_lane = []
+
+overlay_obj = Overlay()
+
+def process_image(img, overlay=None):
+    return detect_lanes(img, mtx, dist, overlay=overlay_obj)
+```
